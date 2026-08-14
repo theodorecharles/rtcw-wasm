@@ -7,6 +7,8 @@ artifacts
 references
 *.pk3
 *.PK3
+*.pk4
+*.PK4
 SP/build/*
 !SP/build/release-linux-x86_64/
 !SP/build/release-linux-x86_64/iowolfsp.x86_64
