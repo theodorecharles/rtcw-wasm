@@ -30,6 +30,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/html5.h>
+#endif
+
 #include "../client/client.h"
 #include "../sys/sys_local.h"
 
@@ -349,6 +353,25 @@ static void IN_ActivateMouse( qboolean isFullscreen )
 {
 	if (!mouseAvailable || !SDL_WasInit( SDL_INIT_VIDEO ) )
 		return;
+
+#ifdef __EMSCRIPTEN__
+	{
+		EmscriptenPointerlockChangeEvent pointerLock;
+		qboolean locked = emscripten_get_pointerlock_status( &pointerLock ) == EMSCRIPTEN_RESULT_SUCCESS && pointerLock.isActive;
+
+		// Browser menus need ordinary absolute mouse input.  Requesting SDL
+		// relative mode here arms pointer lock on the next click and consumes
+		// that click before RTCW's UI sees it.  The launcher owns the explicit
+		// pointer-lock gesture; only enable relative mode after it succeeds.
+		SDL_SetRelativeMouseMode( locked ? SDL_TRUE : SDL_FALSE );
+		SDL_SetWindowGrab( SDL_window, locked ? SDL_TRUE : SDL_FALSE );
+		if ( !mouseActive ) {
+			IN_GobbleMotionEvents();
+		}
+		mouseActive = qtrue;
+		return;
+	}
+#endif
 
 	if( !mouseActive )
 	{

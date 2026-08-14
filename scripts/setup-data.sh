@@ -5,7 +5,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 SOURCE_MAIN=${1:-${RTCW_MAIN_DIR:-}}
 MANIFEST="$ROOT/runtime/asset-manifest.json"
 
-SP_FILES='pak0.pk3 sp_pak1.pk3 sp_pak2.pk3 sp_pak3.pk3'
+SP_FILES='pak0.pk3 sp_pak1.pk3 sp_pak2.pk3 sp_pak3.pk3 sp_pak4.pk3'
 MP_FILES='mp_bin.pk3 mp_pak0.pk3 mp_pak1.pk3 mp_pak2.pk3 mp_pak3.pk3 mp_pak4.pk3 mp_pak5.pk3 mp_pakmaps0.pk3 mp_pakmaps1.pk3 mp_pakmaps2.pk3 mp_pakmaps3.pk3 mp_pakmaps4.pk3 mp_pakmaps5.pk3 mp_pakmaps6.pk3'
 
 if [ -z "$SOURCE_MAIN" ]; then

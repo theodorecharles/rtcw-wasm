@@ -68,6 +68,24 @@ cvar_t *r_sdlDriver;
 int qglMajorVersion, qglMinorVersion;
 int qglesMajorVersion, qglesMinorVersion;
 
+#ifdef __EMSCRIPTEN__
+static void APIENTRY GLimp_Emscripten_MultiTexCoord4f( GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q ) {
+	(void)target; (void)s; (void)t; (void)r; (void)q;
+}
+static void APIENTRY GLimp_Emscripten_ArrayElement( GLint i ) {
+	(void)i;
+}
+static void APIENTRY GLimp_Emscripten_DrawBuffer( GLenum mode ) {
+	/* WebGL exposes a single default back buffer. */
+	(void)mode;
+}
+#ifdef USE_OPENGLES
+extern void APIENTRY glClipPlane( GLenum plane, const GLdouble *equation );
+extern void APIENTRY glFrustum( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val );
+extern void APIENTRY glOrtho( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val );
+#endif
+#endif
+
 void (APIENTRYP qglActiveTextureARB) (GLenum texture);
 void (APIENTRYP qglClientActiveTextureARB) (GLenum texture);
 void (APIENTRYP qglMultiTexCoord2fARB) (GLenum target, GLfloat s, GLfloat t);
@@ -307,7 +325,9 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 	const char *version;
 
 #ifdef __SDL_NOGETPROCADDR__
-#define GLE( ret, name, ... ) qgl##name = gl#name;
+#define GLE( ret, name, ... ) qgl##name = gl##name;
+#elif defined(__EMSCRIPTEN__)
+#define GLE( ret, name, ... ) qgl##name = (name##proc *) SDL_GL_GetProcAddress("gl" #name);
 #else
 #define GLE( ret, name, ... ) qgl##name = (name##proc *) SDL_GL_GetProcAddress("gl" #name); \
 	if ( qgl##name == NULL ) { \
@@ -340,6 +360,23 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 	} else {
 		sscanf( version, "%d.%d", &qglMajorVersion, &qglMinorVersion );
 	}
+
+#ifdef __EMSCRIPTEN__
+	/* LEGACY_GL_EMULATION exposes the desktop fixed-function entry points on
+	 * top of WebGL, while WebGL's version string still identifies GLES. Let
+	 * the native RTCW renderer bind that emulated OpenGL 2 surface. */
+#ifdef USE_OPENGLES
+	qglMajorVersion = 0;
+	qglMinorVersion = 0;
+	qglesMajorVersion = 1;
+	qglesMinorVersion = 1;
+#else
+	qglMajorVersion = 2;
+	qglMinorVersion = 0;
+	qglesMajorVersion = 0;
+	qglesMinorVersion = 0;
+#endif
+#endif
 
 	if ( fixedFunction ) {
 		if ( QGL_VERSION_ATLEAST( 1, 1 ) ) {
@@ -395,6 +432,26 @@ static qboolean GLimp_GetProcAddresses( qboolean fixedFunction ) {
 	if ( QGL_VERSION_ATLEAST( 3, 0 ) || QGLES_VERSION_ATLEAST( 3, 0 ) ) {
 		QGL_3_0_PROCS;
 	}
+
+#ifdef __EMSCRIPTEN__
+	/* SDL's WebGL proc lookup omits some functions implemented by
+	 * LEGACY_GL_EMULATION. Bind those linked shims directly. */
+	qglTexEnvf = glTexEnvf;
+	qglFogf = glFogf;
+	qglFogfv = glFogfv;
+	qglMultiTexCoord4f = GLimp_Emscripten_MultiTexCoord4f;
+#ifndef USE_OPENGLES
+	qglClearDepth = glClearDepth;
+	qglDepthRange = glDepthRange;
+	qglFogi = glFogi;
+#else
+	qglClipPlane = glClipPlane;
+	qglFrustum = glFrustum;
+	qglOrtho = glOrtho;
+#endif
+	qglDrawBuffer = GLimp_Emscripten_DrawBuffer;
+	qglArrayElement = GLimp_Emscripten_ArrayElement;
+#endif
 
 #undef GLE
 
@@ -651,7 +708,11 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 #endif
 
 #ifdef USE_OPENGLES
+#ifdef __EMSCRIPTEN__
+		SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+#else
 		SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 1 );
+#endif
 #endif
 
 		SDL_GL_SetAttribute( SDL_GL_RED_SIZE, perChannelColorBits );
@@ -716,8 +777,13 @@ static int GLimp_SetMode(int mode, qboolean fullscreen, qboolean noborder, qbool
 
 #ifdef USE_OPENGLES
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#ifdef __EMSCRIPTEN__
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+#endif
 #endif
 
 		if (!fixedFunction)

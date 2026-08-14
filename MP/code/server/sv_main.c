@@ -1306,6 +1306,14 @@ int SV_RateMsec(client_t *client)
 {
 	int rate, rateMsec;
 	int messageSize;
+
+	// In-process clients and game bots have no physical link to throttle.
+	// Their rate may still be zero while the local connection is being
+	// established, which must not become a divide-by-zero here.
+	if ( client->netchan.remoteAddress.type == NA_LOOPBACK ||
+		 client->netchan.remoteAddress.type == NA_BOT ) {
+		return 0;
+	}
 	
 	messageSize = client->netchan.lastSentSize;
 	rate = client->rate;
@@ -1324,6 +1332,13 @@ int SV_RateMsec(client_t *client)
 			Cvar_Set("sv_minRate", "1000");
 		if(sv_minRate->integer > rate)
 			rate = sv_minRate->integer;
+	}
+
+	// A just-created local client can be visible to the queue before its
+	// userinfo rate is populated.  Treat it as unthrottled instead of dividing
+	// by zero; normal remote clients are clamped by SV_UserinfoChanged.
+	if ( rate <= 0 ) {
+		rate = 99999;
 	}
 
 	if(client->netchan.remoteAddress.type == NA_IP6)

@@ -788,6 +788,9 @@ void SV_ClientEnterWorld( client_t *client, usercmd_t *cmd ) {
 	sharedEntity_t *ent;
 
 	Com_DPrintf( "Going from CS_PRIMED to CS_ACTIVE for %s\n", client->name );
+#ifdef __EMSCRIPTEN__
+	Com_Printf( "[RTCW WASM] server activated local client %s\n", client->name );
+#endif
 	client->state = CS_ACTIVE;
 
 	// resend all configstrings using the cs commands since these are
@@ -1965,4 +1968,3 @@ void SV_ExecuteClientMessage( client_t *cl, msg_t *msg ) {
 //		Com_Printf( "WARNING: Junk at end of packet for client %i\n", cl - svs.clients );
 //	}
 }
-

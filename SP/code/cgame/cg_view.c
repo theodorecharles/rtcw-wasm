@@ -1446,6 +1446,7 @@ Generates and draws a game scene and status information at the given time.
 */
 void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demoPlayback ) {
 	int inwater;
+	static qboolean reportedPlayableFrame = qfalse;
 
 	cg.cld = 0;         // NERVE - SMF - reset clientDamage
 
@@ -1502,6 +1503,11 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	if ( !cg.snap || ( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
 		CG_DrawInformation();
 		return;
+	}
+
+	if ( !reportedPlayableFrame ) {
+		CG_Printf( "[RTCW WASM] cgame active snapshot; cg_norender=%d\n", cg_norender.integer );
+		reportedPlayableFrame = qtrue;
 	}
 
 	if ( cg.weaponSelect == WP_FG42SCOPE || cg.weaponSelect == WP_SNOOPERSCOPE || cg.weaponSelect == WP_SNIPERRIFLE ) {
@@ -1646,4 +1652,3 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	DEBUGTIME
 }
-

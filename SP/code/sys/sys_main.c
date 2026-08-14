@@ -136,7 +136,13 @@ Handle new console input
 */
 char *Sys_ConsoleInput(void)
 {
+#ifdef __EMSCRIPTEN__
+	/* Browser builds use the in-game console. Reading Emscripten stdin opens
+	 * a blocking JavaScript prompt on every frame. */
+	return NULL;
+#else
 	return CON_Input( );
+#endif
 }
 
 /*

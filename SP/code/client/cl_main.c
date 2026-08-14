@@ -1326,6 +1326,9 @@ void CL_MapLoading( void ) {
 		NET_StringToAdr( clc.servername, &clc.serverAddress, NA_UNSPEC);
 		// we don't need a challenge on the localhost
 
+		#ifdef __EMSCRIPTEN__
+		Com_Printf( "[RTCW WASM] local map client state=%d address-type=%d\n", clc.state, clc.serverAddress.type );
+		#endif
 		CL_CheckForResend();
 	}
 
@@ -2343,6 +2346,9 @@ void CL_CheckForResend( void ) {
 
 	clc.connectTime = cls.realtime;	// for retransmit requests
 	clc.connectPacketCount++;
+	#ifdef __EMSCRIPTEN__
+	Com_Printf( "[RTCW WASM] client connection packet %d state=%d address-type=%d\n", clc.connectPacketCount, clc.state, clc.serverAddress.type );
+	#endif
 
 
 	switch ( clc.state ) {

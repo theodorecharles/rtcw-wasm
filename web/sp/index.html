@@ -3,19 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Return to Castle Wolfenstein — SP WASM checkpoint</title>
+  <title>Return to Castle Wolfenstein — WebAssembly</title>
   <style>
-    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #111; color: #eee; }
-    body { max-width: 54rem; margin: 4rem auto; padding: 0 1.5rem; }
-    pre { padding: 1rem; background: #1c1c1c; border: 1px solid #444; white-space: pre-wrap; }
-    canvas { display: none; width: 100%; aspect-ratio: 4 / 3; background: #000; }
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #080908; color: #e8e3d7; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 15%, #36372d, #080908 62%); }
+    main { width: min(1120px, 100%); padding: 1.25rem; }
+    .panel { width: min(38rem, 100%); margin: auto; padding: 1.4rem; border: 1px solid #77715f; background: rgb(15 16 14 / .97); box-shadow: 0 1.5rem 5rem #000; }
+    h1 { margin: 0 0 .35rem; font: 700 clamp(1.35rem, 4vw, 2rem)/1.1 Georgia, serif; letter-spacing: .08em; text-transform: uppercase; }
+    p { line-height: 1.45; }
+    label { display: grid; gap: .35rem; margin: .85rem 0; }
+    input, select, button { width: 100%; padding: .65rem .75rem; border: 1px solid #77715f; background: #22231e; color: inherit; font: inherit; }
+    button { cursor: pointer; font-weight: 700; background: #4e503d; }
+    button:hover, button:focus-visible { background: #686b51; }
+    button:disabled { opacity: .5; cursor: wait; }
+    details { margin: .85rem 0; }
+    .inline { display: flex; gap: .8rem; align-items: center; }
+    .inline input { width: auto; }
+    #runtime[hidden], #launcher[hidden] { display: none; }
+    #runtime { position: relative; width: min(100%, calc(100vh * 4 / 3)); margin: auto; aspect-ratio: 4 / 3; background: #000; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; background: #000; outline: none; cursor: none; }
+    #runtime-controls { position: absolute; z-index: 2; top: .7rem; right: .7rem; display: flex; gap: .5rem; }
+    #runtime-controls button { width: auto; padding: .45rem .65rem; background: rgb(18 18 16 / .78); }
+    #status { min-height: 3.2rem; white-space: pre-wrap; color: #d6c690; }
+    progress { width: 100%; height: .7rem; }
+    #console { height: 10rem; margin: .75rem 0 0; padding: .65rem; overflow: auto; border: 1px solid #38382f; background: #050505; color: #b9b8a8; font: 12px/1.35 ui-monospace, monospace; white-space: pre-wrap; }
+    .note { color: #aaa796; font-size: .9rem; }
   </style>
 </head>
 <body>
-  <h1>RTCW single-player WASM checkpoint</h1>
-  <p>This page verifies the generated engine and QVM artifacts before browser-local owner-data integration.</p>
-  <pre id="status">Checking browser artifacts…</pre>
-  <canvas id="canvas" width="1280" height="960" tabindex="0"></canvas>
-  <script type="module" src="diagnostics.js"></script>
+  <main>
+    <section id="launcher" class="panel">
+      <h1>Return to Castle Wolfenstein</h1>
+      <p>The real ioRTCW engine runs locally in this page. Owner-installed PK3s are read only from this machine's loopback data mount, verified in the browser, and never committed or uploaded.</p>
+      <label>Mode
+        <select id="mode"><option value="sp">Single Player</option><option value="mp">Multiplayer</option></select>
+      </label>
+      <label>Player name <input id="player-name" maxlength="32" autocomplete="nickname" value="Agent"></label>
+      <details>
+        <summary>Advanced settings</summary>
+        <label>Graphics ceiling
+          <select id="quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="ultra" selected>Ultra</option></select>
+        </label>
+        <label>Frame-rate target
+          <select id="fps"><option value="30">30 FPS</option><option value="60" selected>60 FPS</option><option value="120">120 FPS</option></select>
+        </label>
+        <label class="inline"><input id="dynamic-quality" type="checkbox" disabled> Dynamic quality (next milestone)</label>
+      </details>
+      <button id="play" type="button">Play</button>
+      <p id="status" role="status">Ready to validate owner data.</p>
+      <progress id="progress" max="1" value="0" hidden></progress>
+      <p class="note">Development import is intentionally available only on <code>localhost</code>/<code>127.0.0.1</code>. Public images do not expose <code>/owner-data</code> or <code>/data</code>.</p>
+      <pre id="console" aria-label="Engine startup console"></pre>
+    </section>
+
+    <section id="runtime" hidden>
+      <div id="runtime-controls">
+        <button id="capture" type="button">Capture mouse</button>
+        <button id="show-console" type="button">Startup logs</button>
+      </div>
+      <canvas id="canvas" width="1280" height="960" tabindex="0" aria-label="Return to Castle Wolfenstein game canvas"></canvas>
+    </section>
+  </main>
+  <script src="asset-spec.js"></script>
+  <script src="launcher.js"></script>
 </body>
 </html>

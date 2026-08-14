@@ -590,6 +590,19 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec ) {
 	}
 	cmd->commandId = RC_SWAP_BUFFERS;
 
+#ifdef __EMSCRIPTEN__
+	{
+		static qboolean reportedWorldFrame = qfalse;
+		if ( !reportedWorldFrame && tr.world && backEnd.pc.c_surfaces > 0 ) {
+			ri.Printf( PRINT_ALL,
+				"[RTCW WASM] renderer submitted world frame: surfaces=%d vertices=%d indexes=%d glError=0x%x\n",
+				backEnd.pc.c_surfaces, backEnd.pc.c_vertexes,
+				backEnd.pc.c_indexes, qglGetError() );
+			reportedWorldFrame = qtrue;
+		}
+	}
+#endif
+
 	R_IssueRenderCommands( qtrue );
 
 	R_InitNextFrame();
@@ -631,4 +644,3 @@ void RE_TakeVideoFrame( int width, int height,
 	cmd->encodeBuffer = encodeBuffer;
 	cmd->motionJpeg = motionJpeg;
 }
-

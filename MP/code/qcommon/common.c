@@ -3214,6 +3214,7 @@ void Com_Frame( void ) {
 	else
 		minMsec = 1;
 
+#ifndef __EMSCRIPTEN__
 	do
 	{
 		if(com_sv_running->integer)
@@ -3233,6 +3234,7 @@ void Com_Frame( void ) {
 		else
 			NET_Sleep(timeVal - 1);
 	} while(Com_TimeVal(minMsec));
+#endif
 
 	IN_Frame();
 	
@@ -3260,6 +3262,13 @@ void Com_Frame( void ) {
 	}
 
 	SV_Frame( msec );
+
+#ifdef __EMSCRIPTEN__
+	// Native builds drain fragmented netchan messages while waiting for the
+	// next frame.  A browser main loop must never block, so service the same
+	// queue once per animation frame instead.
+	SV_SendQueuedPackets();
+#endif
 
 	// if "dedicated" has been modified, start up
 	// or shut down the client system.

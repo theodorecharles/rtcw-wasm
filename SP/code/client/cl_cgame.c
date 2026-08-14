@@ -1125,9 +1125,19 @@ CL_FirstSnapshot
 void CL_FirstSnapshot( void ) {
 	// ignore snapshots that don't have entities
 	if ( cl.snap.snapFlags & SNAPFLAG_NOT_ACTIVE ) {
+#ifdef __EMSCRIPTEN__
+		static qboolean reportedInactiveSnapshot = qfalse;
+		if ( !reportedInactiveSnapshot ) {
+			Com_Printf( "[RTCW WASM] waiting for active first snapshot (flags=%d)\n", cl.snap.snapFlags );
+			reportedInactiveSnapshot = qtrue;
+		}
+#endif
 		return;
 	}
 	clc.state = CA_ACTIVE;
+#ifdef __EMSCRIPTEN__
+	Com_Printf( "[RTCW WASM] first active snapshot received; gameplay live\n" );
+#endif
 
 	// set the timedelta so we are exactly on this first frame
 	cl.serverTimeDelta = cl.snap.serverTime - cls.realtime;

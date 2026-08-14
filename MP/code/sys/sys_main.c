@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #ifndef DEDICATED
 #ifdef USE_LOCAL_HEADERS
 #	include "SDL.h"
@@ -132,7 +136,13 @@ Handle new console input
 */
 char *Sys_ConsoleInput(void)
 {
+#ifdef __EMSCRIPTEN__
+	/* Browser builds use the in-game console. Reading Emscripten stdin opens
+	 * a blocking JavaScript prompt on every frame. */
+	return NULL;
+#else
 	return CON_Input( );
+#endif
 }
 
 /*
@@ -681,6 +691,13 @@ void Sys_SigHandler( int signal )
 		Sys_Exit( 2 );
 }
 
+#ifdef __EMSCRIPTEN__
+static void Sys_EmscriptenFrame( void )
+{
+	Com_Frame( );
+}
+#endif
+
 /*
 =================
 main
@@ -759,11 +776,14 @@ int main( int argc, char **argv )
 	signal( SIGTERM, Sys_SigHandler );
 	signal( SIGINT, Sys_SigHandler );
 
+#ifdef __EMSCRIPTEN__
+	emscripten_set_main_loop( Sys_EmscriptenFrame, 0, 0 );
+#else
 	while( 1 )
 	{
 		Com_Frame( );
 	}
+#endif
 
 	return 0;
 }
-

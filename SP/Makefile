@@ -1033,6 +1033,9 @@ else # ifeq sunos
 #############################################################################
 ifeq ($(PLATFORM),emscripten)
   BASE_CFLAGS = -Wall -fno-strict-aliasing -DARCH_STRING=\\\"wasm32\\\"
+  ifeq ($(USE_OPENGLES),1)
+    BASE_CFLAGS += -DUSE_OPENGLES
+  endif
   CLIENT_CFLAGS += -sUSE_SDL=2
   OPTIMIZEVM = -O2
   OPTIMIZE = -O2
@@ -1056,7 +1059,8 @@ ifeq ($(PLATFORM),emscripten)
     -sINITIAL_MEMORY=268435456 \
     -sSTACK_SIZE=2097152 \
     -sFORCE_FILESYSTEM=1 \
-    -sEXPORTED_RUNTIME_METHODS=['callMain','FS'] \
+    -sEXPORTED_RUNTIME_METHODS=['callMain','FS','IDBFS'] \
+    -lidbfs.js \
     -sINVOKE_RUN=0 \
     -sEXIT_RUNTIME=0 \
     -sENVIRONMENT=web

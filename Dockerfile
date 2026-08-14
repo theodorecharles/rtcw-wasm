@@ -4,11 +4,11 @@ FROM nginx:1.27-alpine
 
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.title="RTCW WASM" \
-      org.opencontainers.image.description="Assetless RTCW SP WASM diagnostic checkpoint" \
+	  org.opencontainers.image.description="Assetless RTCW SP and MP WebAssembly clients" \
       org.opencontainers.image.source="https://github.com/theodorecharles/rtcw-wasm" \
       org.opencontainers.image.revision="$VCS_REF"
 
-COPY web/sp /usr/share/nginx/html/web/sp
+COPY web/sp /usr/share/nginx/html
 COPY SP/build/release-linux-x86_64/iowolfsp.x86_64 /opt/rtcw/bin/iowolfsp.x86_64
 COPY SP/build/release-linux-x86_64/main/vm /opt/rtcw/sp-vm
 COPY MP/build/release-linux-x86_64/iowolfded.x86_64 /opt/rtcw/bin/iowolfded.x86_64

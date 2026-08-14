@@ -534,6 +534,20 @@ void RE_RenderScene( const refdef_t *fd ) {
 
 	R_RenderView( &parms );
 
+#ifdef __EMSCRIPTEN__
+	{
+		static qboolean reportedWorldSubmission = qfalse;
+		if ( !reportedWorldSubmission && tr.world && !( fd->rdflags & RDF_NOWORLDMODEL ) ) {
+			ri.Printf( PRINT_ALL,
+				"[RTCW WASM] queued first world scene: drawSurfs=%d entities=%d viewport=%dx%d fov=%.1fx%.1f\n",
+				tr.refdef.numDrawSurfs - r_firstSceneDrawSurf,
+				tr.refdef.num_entities, parms.viewportWidth,
+				parms.viewportHeight, parms.fovX, parms.fovY );
+			reportedWorldSubmission = qtrue;
+		}
+	}
+#endif
+
 	// the next scene rendered in this frame will tack on after this one
 	r_firstSceneDrawSurf = tr.refdef.numDrawSurfs;
 	r_firstSceneEntity = r_numentities;
