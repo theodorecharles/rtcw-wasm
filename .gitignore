@@ -37,3 +37,11 @@ profile
 # Microsoft Visual Studio
 ####################
 *.sdf
+
+# rtcw-wasm local/runtime data
+references/
+data/
+runtime/
+artifacts/runtime/
+*.pk3
+*.PK3
