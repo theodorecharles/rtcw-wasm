@@ -14,9 +14,16 @@ COPY SP/build/release-linux-x86_64/main/vm /opt/rtcw/sp-vm
 COPY MP/build/release-linux-x86_64/iowolfded.x86_64 /opt/rtcw/bin/iowolfded.x86_64
 COPY MP/build/release-linux-x86_64/iowolfmp.x86_64 /opt/rtcw/bin/iowolfmp.x86_64
 COPY MP/build/release-linux-x86_64/main/vm /opt/rtcw/mp-vm
+COPY SP/COPYING.txt /opt/rtcw/SP-COPYING.txt
+COPY MP/COPYING.txt /opt/rtcw/MP-COPYING.txt
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 RUN mkdir -p /data/Main /data/custom_maps /opt/rtcw/bin \
+    && printf '%s\n' \
+        'Corresponding source for this image:' \
+        "https://github.com/theodorecharles/rtcw-wasm/tree/${VCS_REF}" \
+        'The image contains engine/runtime code only; supply proprietary RTCW data through /data.' \
+        > /opt/rtcw/SOURCE-OFFER.txt \
     && chmod 0755 /opt/rtcw/bin/*
 
 ENV HTTP_PORT=8088 \
