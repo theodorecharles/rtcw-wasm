@@ -1,6 +1,6 @@
 # rtcw-wasm implementation runbook
 
-Read `/home/ted/Development/WASM_PORTS_RUNBOOK.md` first. It defines shared browser-shell, input, graphics, data, lifecycle, Docker, test, and coordination rules. This file defines the RTCW-specific path.
+Read `/home/ted/Development/wasm/RUNBOOK.md` first. It defines shared browser-shell, input, graphics, data, lifecycle, Docker, test, and coordination rules. This file defines the RTCW-specific path.
 
 ## Objective
 
@@ -30,6 +30,13 @@ Ship Return to Castle Wolfenstein's real single-player campaign and multiplayer 
 
 - `scripts/build-docker.sh` builds `theodorecharles/rtcw-wasm:dev` for `linux/amd64` from the real SP WASM/QVM artifacts and native SP/MP/dedicated baselines.
 - The image serves the diagnostic page and `/health` on port 8088, mounts owner data at `/data`, and contains zero retail PK3 files. Title/menu execution remains unclaimed.
+
+### Chrome checkpoint (2026-08-14)
+
+- A clean `scripts/setup-data.sh && scripts/build-web-sp.sh` rebuild passed with Emscripten 6.0.6 and staged the SP engine, renderer, and three freshly built QVMs.
+- Chrome loaded the tracked diagnostic launcher over HTTP and reported valid engine JavaScript, WebAssembly, and QVM artifacts with no browser-console warnings or errors.
+- This is an artifact/launcher milestone, not an engine-start milestone. The next blocking task is to mount owner-selected PK3s and the generated QVMs into Emscripten's filesystem before starting the authentic SP engine.
+- No retail PK3 was copied into the tracked web output or served by the diagnostic page.
 
 ## Downstream-only rule
 
