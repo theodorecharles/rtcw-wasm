@@ -26,6 +26,11 @@ Ship Return to Castle Wolfenstein's real single-player campaign and multiplayer 
 - `scripts/setup-data.sh` validates the separately documented SP and MP PK3 sets, writes an ignored local size/SHA-256 manifest, and exposes the owner-installed `Main` directory only through an ignored symlink. `sp_pak4.pk3` remains outside the required SP manifest because ioRTCW's documented copy list does not require it.
 - Browser title/menu execution is not yet claimed. The first runtime blocker is mounting the ignored PK3s and generated QVMs into Emscripten's filesystem before `callMain`; the tracked diagnostics page reports this boundary explicitly.
 
+### Docker checkpoint (2026-08-14)
+
+- `scripts/build-docker.sh` builds `theodorecharles/rtcw-wasm:dev` for `linux/amd64` from the real SP WASM/QVM artifacts and native SP/MP/dedicated baselines.
+- The image serves the diagnostic page and `/health` on port 8088, mounts owner data at `/data`, and contains zero retail PK3 files. Title/menu execution remains unclaimed.
+
 ## Downstream-only rule
 
 Do not submit anything upstream. Do not open or comment on ioRTCW or id Software pull requests, issues, discussions, or releases. Do not message maintainers. Never push to `upstream`. All generated work stays in `theodorecharles/rtcw-wasm`.
