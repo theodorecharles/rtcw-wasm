@@ -23,17 +23,18 @@ Ship Return to Castle Wolfenstein's real single-player campaign and multiplayer 
 - Native `iowolfmp`, `iowolfded`, MP cgame/qagame/UI modules, and MP QVMs build on Linux. GCC 15 requires the host QVM tools to use GNU C17 because their historical `constexpr` function name conflicts with C23.
 - `scripts/build-web-sp.sh` deterministically builds the real SP engine and OpenGL 1 renderer as `iowolfsp.js` plus `iowolfsp.wasm`, and packages freshly built SP cgame/qagame/UI QVMs beside them.
 - The Emscripten client uses SDL2, WebGL 2 legacy-GL emulation, an animation-frame main loop, and no OpenAL/curl/Mumble/VoIP/renderer dlopen for this first compile checkpoint.
-- `scripts/setup-data.sh` validates the separately documented SP and MP PK3 sets, writes an ignored local size/SHA-256 manifest, and exposes the owner-installed `Main` directory only through an ignored symlink. `sp_pak4.pk3` remains outside the required SP manifest because ioRTCW's documented copy list does not require it.
+- `scripts/setup-data.sh` validates the separately documented SP and MP PK3 sets and writes an ignored local size/SHA-256 manifest under `runtime/`. It never copies or links retail files into the web tree. `sp_pak4.pk3` remains outside the required SP manifest because ioRTCW's documented copy list does not require it.
 - Browser title/menu execution is not yet claimed. The first runtime blocker is mounting the ignored PK3s and generated QVMs into Emscripten's filesystem before `callMain`; the tracked diagnostics page reports this boundary explicitly.
 
 ### Docker checkpoint (2026-08-14)
 
 - `scripts/build-docker.sh` builds `theodorecharles/rtcw-wasm:dev` for `linux/amd64` from the real SP WASM/QVM artifacts and native SP/MP/dedicated baselines.
-- The image serves the diagnostic page and `/health` on port 8088, mounts owner data at `/data`, and contains zero retail PK3 files. Title/menu execution remains unclaimed.
+- The image serves the diagnostic page and `/health` on port 8088, accepts an owner-data volume at `/data` for the future native dedicated server, and contains zero retail PK3 files. Nginx explicitly returns 404 for `/data` and `/data/*`; browser clients will use local selection rather than HTTP access to that mount. Title/menu execution remains unclaimed.
+- A clean `linux/amd64` boundary-test image returned 200 for `/health` and the diagnostics page, while `/data`, a synthetic `/data/Main/pak0.pk3` request, and the obsolete web manifest path all returned 404.
 
 ### Chrome checkpoint (2026-08-14)
 
-- A clean `scripts/setup-data.sh && scripts/build-web-sp.sh` rebuild passed with Emscripten 6.0.6 and staged the SP engine, renderer, and three freshly built QVMs.
+- A clean data validation plus `scripts/build-web-sp.sh` rebuild passed with Emscripten 6.0.6 and staged the SP engine, renderer, and three freshly built QVMs.
 - Chrome loaded the tracked diagnostic launcher over HTTP and reported valid engine JavaScript, WebAssembly, and QVM artifacts with no browser-console warnings or errors.
 - This is an artifact/launcher milestone, not an engine-start milestone. The next blocking task is to mount owner-selected PK3s and the generated QVMs into Emscripten's filesystem before starting the authentic SP engine.
 - No retail PK3 was copied into the tracked web output or served by the diagnostic page.
@@ -74,7 +75,7 @@ Main/mp_pak0.pk3 ... Main/mp_pak5.pk3
 Main/mp_pakmaps0.pk3 ... Main/mp_pakmaps6.pk3
 ```
 
-Build separate ordered SP and MP manifests from the actual install, with path, size, and local checksum. Never track or publish the PK3s. Owner-mounted Docker data normalizes to `/data/Main`; custom PK3s use writable `/data/custom_maps` and are never mixed into the immutable retail manifest.
+Build separate ordered SP and MP manifests from the actual install, with path, size, and local checksum. Never track or publish the PK3s or put owner-data links under a served web root. Browser clients select and retain data in origin-private storage. Owner-mounted Docker data normalizes to `/data/Main` for the native dedicated server only; custom PK3s use writable `/data/custom_maps` and are never mixed into the immutable retail manifest.
 
 ## Native baselines and first web compile
 

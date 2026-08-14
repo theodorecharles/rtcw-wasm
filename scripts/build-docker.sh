@@ -6,7 +6,6 @@ image="${IMAGE_REPO:-theodorecharles/rtcw-wasm}:${IMAGE_TAG:-dev}"
 
 for artifact in \
   web/sp/index.html \
-  web/sp/asset-manifest.json \
   web/sp/client/iowolfsp.js \
   web/sp/client/iowolfsp.wasm \
   web/sp/client/main/vm/cgame.sp.qvm \
