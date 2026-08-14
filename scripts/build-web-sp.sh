@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-EMSDK_ENV=${EMSDK_ENV:-/home/ted/emsdk/emsdk_env.sh}
 JOBS=${JOBS:-8}
 NATIVE_BUILD=build
 WEB_BUILD=build/web
@@ -10,10 +9,17 @@ NATIVE_OUT="$ROOT/SP/$NATIVE_BUILD/release-linux-x86_64"
 WEB_OUT="$ROOT/SP/$WEB_BUILD/release-emscripten-wasm32"
 CLIENT_OUT="$ROOT/web/sp/client"
 
-if [ ! -f "$EMSDK_ENV" ]; then
-	echo "Emscripten environment not found: $EMSDK_ENV" >&2
-	echo "Set EMSDK_ENV to the absolute path of emsdk_env.sh." >&2
-	exit 1
+if ! command -v emcc >/dev/null 2>&1 || ! command -v emmake >/dev/null 2>&1; then
+	EMSDK_ENV=${EMSDK_ENV:-}
+	if [ -z "$EMSDK_ENV" ] && [ -n "${EMSDK_DIR:-}" ]; then
+		EMSDK_ENV="$EMSDK_DIR/emsdk_env.sh"
+	fi
+	if [ -z "$EMSDK_ENV" ] || [ ! -f "$EMSDK_ENV" ]; then
+		echo "Activate Emscripten first, or set EMSDK_ENV/EMSDK_DIR to an emsdk checkout." >&2
+		exit 1
+	fi
+	# shellcheck disable=SC1090
+	. "$EMSDK_ENV" >/dev/null
 fi
 
 # QVM tools must remain native executables. GNU C17 also avoids GCC 15's C23
@@ -24,8 +30,6 @@ make -C "$ROOT/SP" -j"$JOBS" \
 	BUILD_GAME_QVM=1 BUILD_BASEGAME=1 \
 	TOOLS_CC='gcc -std=gnu17'
 
-# shellcheck disable=SC1090
-. "$EMSDK_ENV" >/dev/null
 emmake make -C "$ROOT/SP" -j"$JOBS" \
 	PLATFORM=emscripten ARCH=wasm32 BUILD_DIR="$WEB_BUILD" \
 	BUILD_SERVER=0 BUILD_CLIENT=1 BUILD_GAME_SO=0 BUILD_GAME_QVM=0 \
