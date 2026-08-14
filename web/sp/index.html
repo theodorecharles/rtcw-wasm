@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Return to Castle Wolfenstein — SP WASM checkpoint</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #111; color: #eee; }
+    body { max-width: 54rem; margin: 4rem auto; padding: 0 1.5rem; }
+    pre { padding: 1rem; background: #1c1c1c; border: 1px solid #444; white-space: pre-wrap; }
+    canvas { display: none; width: 100%; aspect-ratio: 4 / 3; background: #000; }
+  </style>
+</head>
+<body>
+  <h1>RTCW single-player WASM checkpoint</h1>
+  <p>This page verifies the generated engine, QVM, and owner-supplied data prerequisites before runtime integration.</p>
+  <pre id="status">Checking browser artifacts…</pre>
+  <canvas id="canvas" width="1280" height="960" tabindex="0"></canvas>
+  <script type="module" src="diagnostics.js"></script>
+</body>
+</html>

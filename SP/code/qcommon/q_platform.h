@@ -165,6 +165,19 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #endif
 
+//=========================================================== EMSCRIPTEN ===
+
+#if defined(__EMSCRIPTEN__)
+
+#define OS_STRING "emscripten"
+#define ARCH_STRING "wasm32"
+#define ID_INLINE inline
+#define PATH_SEP '/'
+#define Q3_LITTLE_ENDIAN
+#define DLL_EXT ".wasm"
+
+#endif
+
 //================================================================= LINUX ===
 
 #if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)

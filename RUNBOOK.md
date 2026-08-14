@@ -17,6 +17,15 @@ Ship Return to Castle Wolfenstein's real single-player campaign and multiplayer 
 - ioRTCW builds separate `iowolfsp`, `iowolfmp`, and dedicated-server paths. Preserve that separation internally even if the web launcher presents one coherent product.
 - No Emscripten target is assumed. Port the known-good id Tech 3 platform changes from `wolfet-wasm` selectively and compile early.
 
+## Wave 1 compile checkpoint
+
+- Native `iowolfsp`, its OpenGL renderers, and SP cgame/qagame/UI modules build on Linux.
+- Native `iowolfmp`, `iowolfded`, MP cgame/qagame/UI modules, and MP QVMs build on Linux. GCC 15 requires the host QVM tools to use GNU C17 because their historical `constexpr` function name conflicts with C23.
+- `scripts/build-web-sp.sh` deterministically builds the real SP engine and OpenGL 1 renderer as `iowolfsp.js` plus `iowolfsp.wasm`, and packages freshly built SP cgame/qagame/UI QVMs beside them.
+- The Emscripten client uses SDL2, WebGL 2 legacy-GL emulation, an animation-frame main loop, and no OpenAL/curl/Mumble/VoIP/renderer dlopen for this first compile checkpoint.
+- `scripts/setup-data.sh` validates the separately documented SP and MP PK3 sets, writes an ignored local size/SHA-256 manifest, and exposes the owner-installed `Main` directory only through an ignored symlink. `sp_pak4.pk3` remains outside the required SP manifest because ioRTCW's documented copy list does not require it.
+- Browser title/menu execution is not yet claimed. The first runtime blocker is mounting the ignored PK3s and generated QVMs into Emscripten's filesystem before `callMain`; the tracked diagnostics page reports this boundary explicitly.
+
 ## Downstream-only rule
 
 Do not submit anything upstream. Do not open or comment on ioRTCW or id Software pull requests, issues, discussions, or releases. Do not message maintainers. Never push to `upstream`. All generated work stays in `theodorecharles/rtcw-wasm`.

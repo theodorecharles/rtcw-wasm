@@ -1031,12 +1031,43 @@ else # ifeq sunos
 #############################################################################
 # SETUP AND BUILD -- GENERIC
 #############################################################################
+ifeq ($(PLATFORM),emscripten)
+  BASE_CFLAGS = -Wall -fno-strict-aliasing -DARCH_STRING=\\\"wasm32\\\"
+  CLIENT_CFLAGS += -sUSE_SDL=2
+  OPTIMIZEVM = -O2
+  OPTIMIZE = -O2
+
+  FULLBINEXT=.js
+  SHLIBEXT=wasm
+  SHLIBCFLAGS=
+  SHLIBLDFLAGS=
+  THREAD_LIBS=
+  LIBS=
+  CLIENT_LIBS=
+  RENDERER_LIBS=
+  SERVER_LIBS=
+
+  CLIENT_LDFLAGS += \
+    -sUSE_SDL=2 \
+    -sLEGACY_GL_EMULATION=1 \
+    -sMIN_WEBGL_VERSION=2 \
+    -sMAX_WEBGL_VERSION=2 \
+    -sALLOW_MEMORY_GROWTH=1 \
+    -sINITIAL_MEMORY=268435456 \
+    -sSTACK_SIZE=2097152 \
+    -sFORCE_FILESYSTEM=1 \
+    -sEXPORTED_RUNTIME_METHODS=['callMain','FS'] \
+    -sINVOKE_RUN=0 \
+    -sEXIT_RUNTIME=0 \
+    -sENVIRONMENT=web
+else
   BASE_CFLAGS=
   OPTIMIZE = -O3
 
   SHLIBEXT=so
   SHLIBCFLAGS=-fPIC
   SHLIBLDFLAGS=-shared
+endif
 
 endif #Linux
 endif #darwin

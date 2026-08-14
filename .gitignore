@@ -43,5 +43,9 @@ references/
 data/
 runtime/
 artifacts/runtime/
+SP/build-web-probe/
+web/sp/client/
+web/sp/Main
+web/sp/asset-manifest.json
 *.pk3
 *.PK3
